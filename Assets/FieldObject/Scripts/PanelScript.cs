@@ -2,131 +2,138 @@ using System.Collections;
 using System.Collections.Generic;
 using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine;
+using DG.Tweening;
+using System;
 
 public class PanelScript : MonoBehaviour
 {
 
-    [SerializeField] private Vector3 rotation;
-    private Vector3 preRotation;
+    [SerializeField]  private float rotCount = 0;
+    [SerializeField] private float preRotCount = 0;
 
-    [SerializeField] private float rotateD = 2.0f;
-    private float rotateT = 0.0f;
+    [SerializeField] private Vector3 rotation;
+
+    [SerializeField] private int zCheck = 1;
 
     private bool isRotating = false;
     private int rotateType = 0;
+
+    private GameManagerObject gameManager;
+
 
     // Start is called before the first frame update
     void Start()
     {
         rotation = this.transform.eulerAngles;
-        preRotation = rotation;
+
+        gameManager = GameObject.FindWithTag("GameManager").GetComponent<GameManagerObject>();
     }
 
     // Update is called once per frame
     void Update()
     {
-        rotation = this.transform.eulerAngles;
 
-        if (isRotating == false)
+        if (Input.GetKey(KeyCode.R) && isRotating == false)
         {
-            if (Input.GetKeyUp(KeyCode.RightArrow))
+
+            rotation.x = 0.0f;
+            rotation.y = 0.0f;
+
+        }
+
+            if (isRotating == false)
+        {
+            int inputArrowKey = gameManager.GetInputArrowKey();
+
+            if (inputArrowKey != -1)
             {
-                RotateStart(0);
-            }
-            else if (Input.GetKeyUp(KeyCode.DownArrow))
-            {
-                RotateStart(1);
-            }
-            else if (Input.GetKeyUp(KeyCode.LeftArrow))
-            {
-                RotateStart(2);
-            }
-            else if (Input.GetKeyUp(KeyCode.UpArrow))
-            {
-                RotateStart(3);
+                isRotating = true;
+                //preRotation = rotation;
+                rotateType = inputArrowKey;
+
+                rotCount = 0.0f;
+                //rotCount++;
+
+                DOTween.To(() => rotCount, (value) => rotCount = value, 180.0f, 1.0f).SetEase(Ease.InOutSine).OnComplete(() =>
+                {
+                    rotation.x = (int)Math.Round(rotation.x);
+                    rotation.y = (int)Math.Round(rotation.y);
+
+                    rotCount = 0.0f;
+                    preRotCount = 0.0f;
+                    isRotating = false;
+                    gameManager.SetInputArrowKey(-1);
+                });
             }
         }
         else
         {
 
-            rotateT += Time.deltaTime;
-            rotateT = Mathf.Clamp(rotateT, 0.0f, rotateD);
+            //if(rotCount > 179)
+            //{
+            //    rotCount = 180.0f;
+            //}
 
-            float t = rotateT / rotateD;
+            float rotPlus = rotCount - preRotCount;
 
-            float ta = t;
-            Vector3 rotationA = preRotation;
+            zCheck = 1;
+
+            if (this.transform.localRotation.y != 0)
+            {
+                zCheck = -1;
+            }
+
             switch (rotateType)
             {
-                case 0:
+                   case 0:
 
-                    rotationA = preRotation;
-                    rotationA.y = rotationA.y + 180.0f * ta;
-
-                    rotation = rotationA;
-
+                    rotation.y += rotPlus;
                     break;
                 case 1:
 
-                     rotationA = preRotation;
-                    rotationA.x = rotationA.x + 180.0f * ta;
-
-                    rotation = rotationA;
-
+                    rotation.x -= rotPlus * zCheck;
                     break;
                 case 2:
 
-                     rotationA = preRotation;
-                    rotationA.y = rotationA.y - 180.0f * ta;
-
-                    rotation = rotationA;
-
+                    rotation.y -= rotPlus;
                     break;
                 case 3:
 
-                     rotationA = preRotation;
-                    rotationA.x = rotationA.x - 180.0f * ta;
-
-                    rotation = rotationA;
-
+                    rotation.x += rotPlus * zCheck;
                     break;
             }
 
-            if(ta >= 1.0f)
-            {
-                isRotating = false;
-            }
+            //Debug.Log(rotCount - preRotCount);
+            preRotCount = rotCount;
         }
 
-        if (isRotating == false)
+
+        if(rotation.x >= 360)
         {
-            if (rotation.x >= 360)
-            {
-                rotation.x -= 360;
-            }
-            else if (rotation.x <= -360)
-            {
-                rotation.x += 360;
-            }
-
-            if (rotation.y >= 360)
-            {
-                rotation.y -= 360;
-            }
-            else if (rotation.y <= -360)
-            {
-                rotation.y += 360;
-            }
+            rotation.x -= 360;
         }
+        else if (rotation.x <= -360)
+        {
+            rotation.x += 360;
+        }
+
+        if (rotation.y >= 360)
+        {
+            rotation.y -= 360;
+        }
+        else if (rotation.y <= -360)
+        {
+            rotation.y += 360;
+        }
+
+        
 
         this.transform.eulerAngles = rotation;
     }
 
     private void RotateStart(int rotatetype)
     {
-        isRotating = true;
-        preRotation = rotation;
-        rotateType = rotatetype;
-        rotateT = 0.0f;
+        
+
     } 
 }
