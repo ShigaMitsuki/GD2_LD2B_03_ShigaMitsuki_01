@@ -19,6 +19,10 @@ public class PlayerScript : MonoBehaviour
     [SerializeField] private bool isGrabLadder = false;
     [SerializeField] private bool inGate = false;
 
+    private GameObject nearLadder = null;
+
+    [SerializeField] private GameObject tester;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -94,9 +98,23 @@ public class PlayerScript : MonoBehaviour
 
                 if (isGrabLadder == true)
             {
-                if (Input.GetKey(KeyCode.W))
+                if (nearLadder != null)
                 {
-                    totalVelocity.y = walkSpeed;
+
+                    Vector3 ladderPos = nearLadder.transform.position;
+                    Vector3 playerPos = this.transform.position;
+
+                    float height = nearLadder.GetComponent<Renderer>().bounds.size.y;
+
+                    ladderPos.y = ladderPos.y + height * 0.5f ;
+
+                    if (playerPos .y < ladderPos.y) {
+                        if (Input.GetKey(KeyCode.W))
+                        {
+                            totalVelocity.y = walkSpeed;
+                            //tester.transform.position = ladderPos;
+                        }
+                    }
                 }
             }
             else if (inGate == true)
@@ -126,10 +144,12 @@ public class PlayerScript : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if(other.gameObject.tag == "Ladder")
+        if(other.tag == "Ladder")
         {
             inLadder = true;
-        }else if (other.gameObject.tag == "Gate")
+            nearLadder = other.gameObject;
+        }
+        else if (other.tag == "Gate")
         {
             inGate = true;
         }
@@ -137,11 +157,12 @@ public class PlayerScript : MonoBehaviour
 
     private void OnTriggerStay(Collider other)
     {
-        if (other.gameObject.tag == "Ladder")
+        if (other.tag == "Ladder")
         {
             inLadder = true;
+            nearLadder = other.gameObject;
         }
-        else if(other.gameObject.tag == "Gate")
+        else if(other.tag == "Gate")
         {
             inGate = true;
         }
@@ -149,9 +170,10 @@ public class PlayerScript : MonoBehaviour
 
     private void OnTriggerExit(Collider other)
     {
-        if (other.gameObject.tag == "Ladder")
+        if (other.tag == "Ladder")
         {
             inLadder = false;
+            nearLadder = null;
             if (isGrabLadder == true)
             {
                 totalVelocity.y = 0;
@@ -159,7 +181,7 @@ public class PlayerScript : MonoBehaviour
             }
         }
         
-        if (other.gameObject.tag == "Gate")
+        if (other.tag == "Gate")
         {
             inGate = false;
         }
