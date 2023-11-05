@@ -30,8 +30,6 @@ public class GameManagerObject : MonoBehaviour
     void Start()
     {
         goal = GameObject.FindWithTag("Goal").GetComponent<GoalScript>();
-
-        SceneChangeDark = GameObject.FindWithTag("Dark");
     }
 
     // Update is called once per frame
