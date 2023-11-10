@@ -476,7 +476,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 0
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
 --- !u!1001 &826063036
 PrefabInstance:
@@ -796,6 +796,14 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 966817896}
     m_Modifications:
+    - target: {fileID: 8251094417927497445, guid: 00a7ac7db74558844918413fac1af5ea, type: 3}
+      propertyPath: m_Materials.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8251094417927497445, guid: 00a7ac7db74558844918413fac1af5ea, type: 3}
+      propertyPath: m_Materials.Array.data[1]
+      value: 
+      objectReference: {fileID: 2100000, guid: 654d20b3df6c0b74794d98279f56f275, type: 2}
     - target: {fileID: 8251094417927497447, guid: 00a7ac7db74558844918413fac1af5ea, type: 3}
       propertyPath: m_RootOrder
       value: 1
@@ -916,7 +924,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6861556310103458184, guid: 39386cebe9c356e4d9f99c8c3c83a078, type: 3}
       propertyPath: nextSage
-      value: 3
+      value: 4
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 39386cebe9c356e4d9f99c8c3c83a078, type: 3}

@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class PlayerScript : MonoBehaviour
 {
@@ -23,12 +24,20 @@ public class PlayerScript : MonoBehaviour
 
     [SerializeField] private GameObject tester;
 
+    private Animator anim = null;
+
+    private bool isClear = false;
+
+    private bool canMove = true;
+
     // Start is called before the first frame update
     void Start()
     {
         rb = GetComponent<Rigidbody>();
 
         gameManager = GameObject.FindWithTag("GameManager").GetComponent<GameManagerObject>();
+ 
+        anim = GetComponent<Animator>();
     }
 
     // Update is called once per frame
@@ -36,14 +45,17 @@ public class PlayerScript : MonoBehaviour
     {
         int inputArrowKey = gameManager.GetInputArrowKey();
 
-        if (inputArrowKey == -1)
+        if (inputArrowKey == -1 )
         {
-            isStop = false;
+            
+                isStop = isClear;
         }
         else
         {
             isStop = true;
         }
+
+
 
 
         if (isStop == true)
@@ -60,20 +72,31 @@ public class PlayerScript : MonoBehaviour
 
            
         }
-
-          if (isStop == false)
+          if (isStop == false )
         {
 
 
             totalVelocity.x = 0;
+                 anim.SetBool("isWalk",false);
 
-            if (Input.GetKey(KeyCode.D))
+
+            if(isGrabLadder == true)
             {
-                totalVelocity.x = walkSpeed;
+                canMove = true;
             }
-            if (Input.GetKey(KeyCode.A))
+
+            if (canMove == true)
             {
-                totalVelocity.x = -walkSpeed;
+                if (Input.GetKey(KeyCode.D))
+                {
+                    totalVelocity.x = walkSpeed;
+                    anim.SetBool("isWalk", true);
+                }
+                if (Input.GetKey(KeyCode.A))
+                {
+                    totalVelocity.x = -walkSpeed;
+                    anim.SetBool("isWalk", true);
+                }
             }
 
             if (inLadder == true)
@@ -81,6 +104,7 @@ public class PlayerScript : MonoBehaviour
                 if (Input.GetKey(KeyCode.W))
                 {
                     isGrabLadder = true;
+                  
                 }
             }
             else
@@ -139,6 +163,12 @@ public class PlayerScript : MonoBehaviour
             rb.velocity = totalVelocity;
 
         }
+
+          if(this.transform.position.y < -10)
+        {
+            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        }
+
     }
          
 
@@ -162,20 +192,64 @@ public class PlayerScript : MonoBehaviour
             inLadder = true;
             nearLadder = other.gameObject;
         }
-        else if(other.tag == "Gate")
+        else if (other.tag == "Gate")
         {
             inGate = true;
         }
+
+        
     }
 
-    private void OnTriggerExit(Collider other)
+    private void OnCollisionStay(Collision collision)
+    { 
+            
+        if (collision.gameObject.tag == "Stage")
+        {
+
+            ContactPoint[] contacts = collision.contacts;
+
+            Vector3 otherNormal = contacts[0].normal;
+
+            Vector3 upVector = new Vector3(0, 1, 0);
+
+            float dotUN = Vector3.Dot(upVector,otherNormal);
+
+            float dotDeg = Mathf.Acos(dotUN) * Mathf.Rad2Deg;
+
+
+            if(dotDeg <= 45) {
+                canMove = true;
+            }
+            else
+            {
+                canMove = false;
+            }
+               
+
+            Debug.Log(canMove);
+
+        }
+    }
+
+    private void OnCollisionExit(Collision collision)
+    {
+        if (collision.gameObject.tag == "Stage")
+        {
+            canMove = false;
+        }
+    }
+
+        private void OnTriggerExit(Collider other)
     {
         if (other.tag == "Ladder")
         {
             inLadder = false;
             nearLadder = null;
+
+            canMove = false;
             if (isGrabLadder == true)
             {
+
                 totalVelocity.y = 0;
                 rb.velocity = totalVelocity;
             }
@@ -185,6 +259,11 @@ public class PlayerScript : MonoBehaviour
         {
             inGate = false;
         }
+    }
+
+    public void SetIsClear(bool isClear_)
+    {
+        isClear = isClear_;
     }
 
 }

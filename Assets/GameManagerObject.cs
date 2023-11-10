@@ -18,23 +18,30 @@ public class GameManagerObject : MonoBehaviour
 
     [SerializeField]  private bool canInputArrowKey = true;
 
-    private GoalScript goal = null;
+    [SerializeField] private GoalScript goal = null;
+
+    [SerializeField] private PlayerScript player = null;
 
     [SerializeField] private GameObject SceneChangeDark = null;
 
     [SerializeField] private bool isSceneChange = false;
 
-    private float darkT = 0.0f; 
+    private float darkT = 0.0f;
+
+    private string nextSceneName = null;
 
     // Start is called before the first frame update
     void Start()
     {
-        goal = GameObject.FindWithTag("Goal").GetComponent<GoalScript>();
+        player = GameObject.FindWithTag("Player").GetComponent<PlayerScript>();
     }
 
     // Update is called once per frame
     void Update()
     {
+        goal = GameObject.FindWithTag("Goal").GetComponent<GoalScript>();
+
+        player = GameObject.FindWithTag("Player").GetComponent<PlayerScript>();
 
         ArrowKeyInputUpdate();
 
@@ -42,12 +49,15 @@ public class GameManagerObject : MonoBehaviour
         {
             if (goal.GetIsClear() == true)
             {
+
                 isSceneChange = false;
                 SceneChanger(goal.GetNextStage() );
             }
+
+
         }
 
-        SceneChange();
+        SceneChange(nextSceneName);
     }
 
     public int GetInputArrowKey()
@@ -129,22 +139,45 @@ public class GameManagerObject : MonoBehaviour
 
         if (sceneName != null)
         {
-            SceneManager.LoadScene(sceneName);
+            isSceneChange = true;
+
+            player.SetIsClear(true);
         }
+
+
+        nextSceneName = sceneName;
 
     }
 
-    private void SceneChange()
+    private void SceneChange(string sceneName)
     {
-        if (isSceneChange == true)
+        if (sceneName != null)
         {
-            DOTween.To(() => darkT, (value) => darkT = value, 1.0f, 10.0f).SetEase(Ease.InOutSine).OnComplete(() =>
+
+            if (isSceneChange == true)
             {
-                isSceneChange = false;
-            });
+
+                SceneChangeDark.SetActive(true);
+                DOTween.To(() => darkT, (value) => darkT = value, 1.0f, 1.0f).SetEase(Ease.OutBack).OnComplete(() =>
+                {
+                    SceneManager.LoadScene(sceneName);
+                    DOTween.To(() => darkT, (value) => darkT = value, 0.0f, 1.0f).SetEase(Ease.OutBack).SetDelay(0.2f).OnComplete(() =>
+                    {
+                        player.SetIsClear(false);
+                        darkT = 0.0f;
+                        SceneChangeDark.SetActive(false);
+                    });
+                });
+            }
+
+            isSceneChange = false;
         }
 
-         SceneChangeDark.SetActive(isSceneChange);
-        
+
+        float size = darkT;
+
+        SceneChangeDark.transform.localScale = new Vector3(size, 1.0f,1.0f);
+
+
     }
 }

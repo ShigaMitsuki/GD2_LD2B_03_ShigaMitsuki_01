@@ -9,6 +9,7 @@ TagManager:
   - Gate
   - Goal
   - Dark
+  - Stage
   layers:
   - Default
   - TransparentFX

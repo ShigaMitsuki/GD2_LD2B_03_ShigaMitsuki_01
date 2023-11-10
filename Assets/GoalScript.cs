@@ -33,7 +33,15 @@ public class GoalScript : MonoBehaviour
 
     public bool GetIsClear()
     {
-        return isClear;
+        if (isClear == true)
+        {
+            isClear = false;
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
 
     public int GetNextStage()
